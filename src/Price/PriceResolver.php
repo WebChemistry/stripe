@@ -2,6 +2,8 @@
 
 namespace WebChemistry\Stripe\Price;
 
+use BackedEnum;
+
 interface PriceResolver
 {
 

@@ -2,6 +2,7 @@
 
 namespace WebChemistry\Stripe\Price;
 
+use BackedEnum;
 use OutOfBoundsException;
 
 final class DefaultPriceResolver implements PriceResolver
