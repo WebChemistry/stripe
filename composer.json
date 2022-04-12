@@ -1,0 +1,19 @@
+{
+    "name": "webchemistry/stripe",
+    "require": {
+        "php": ">= 8.1",
+        "stripe/stripe-php": "^7.122"
+    },
+    "autoload": {
+        "psr-4": {
+            "WebChemistry\\Stripe\\": "src"
+        }
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.5",
+        "nette/di": "^3.0",
+        "nette/http": "^3.1",
+        "nette/application": "^3.1",
+        "tracy/tracy": "^2.9"
+    }
+}
