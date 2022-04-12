@@ -13,6 +13,8 @@ use WebChemistry\Stripe\Customer\DefaultStripeCustomerFinder;
 use WebChemistry\Stripe\Customer\StripeCustomerFinder;
 use WebChemistry\Stripe\CustomerPortal\CustomerPortalSessionFactory;
 use WebChemistry\Stripe\CustomerPortal\DefaultCustomerPortalSessionFactory;
+use WebChemistry\Stripe\Price\DefaultPriceResolver;
+use WebChemistry\Stripe\Price\PriceResolver;
 use WebChemistry\Stripe\Product\DefaultProductResolver;
 use WebChemistry\Stripe\Product\ProductResolver;
 use WebChemistry\Stripe\Webhook\WebhookEventFactory;
@@ -30,6 +32,10 @@ final class StripeExtension extends CompilerExtension
 				'webhook' => Expect::string()->required(),
 			]),
 			'products' => Expect::arrayOf(Expect::structure([
+				'test' => Expect::string(),
+				'live' => Expect::string(),
+			])),
+			'prices' => Expect::arrayOf(Expect::structure([
 				'test' => Expect::string(),
 				'live' => Expect::string(),
 			])),
@@ -65,6 +71,13 @@ final class StripeExtension extends CompilerExtension
 			->setFactory(
 				DefaultProductResolver::class,
 				[Arrays::map($config->products, fn (stdClass $product) => $product->$environment)]
+			);
+
+		$builder->addDefinition($this->prefix('priceResolver'))
+			->setType(PriceResolver::class)
+			->setFactory(
+				DefaultPriceResolver::class,
+				[Arrays::map($config->prices, fn (stdClass $price) => $price->$environment)]
 			);
 	}
 
