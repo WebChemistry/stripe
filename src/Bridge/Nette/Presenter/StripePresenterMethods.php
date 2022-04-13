@@ -11,6 +11,7 @@ use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookEventFactory;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookProcessor;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookProcessorCollection;
 use WebChemistry\Stripe\Exception\WebhookException;
+use WebChemistry\Stripe\Webhook\DefaultWebhookLogger;
 
 trait StripePresenterMethods
 {
@@ -47,42 +48,51 @@ trait StripePresenterMethods
 		} catch (SignatureVerificationException $exception) {
 			$this->sendError($exception->getMessage(), 403);
 		} catch (Throwable $exception) {
-			$this->logger?->log($exception, Logger::ERROR);
+			$this->logger?->log($exception, ILogger::ERROR);
 
 			$this->sendError($exception->getMessage(), 403);
 		}
 
 		$errors = [];
+		$logs = [];
+		$logger = new DefaultWebhookLogger();
 		foreach ($this->processors->getProcessors() as $processor) {
+			$logger->applyName($processor::class);
+
 			try {
-				$processor->process($event);
+				$processor->process($event, $logger);
 			} catch(WebhookException $exception) {
 				$errors[] = sprintf('Webhook %s: %s', $processor::class, $exception->getMessage());
 			} catch (Throwable $exception) {
 				$this->logger?->log($exception, ILogger::ERROR);
 				$errors[] = sprintf('Webhook %s: %s', $processor::class, $exception->getMessage());
 			}
+
+			$logs = array_merge($logs, $logger->getLogs());
 		}
 
 		if ($errors) {
-			$this->sendError($errors, 500);
+			$this->sendError($errors, 500, $logs);
 		}
 
 		$this->sendJson([
 			'status' => 'success',
+			'logs' => $logs,
 		]);
 	}
 
 	/**
 	 * @param string|string[] $message
+	 * @param string[] $logs
 	 * @return never
 	 */
-	private function sendError(string|array $message, int $code): void
+	private function sendError(string|array $message, int $code, array $logs = []): void
 	{
 		$this->getHttpResponse()->setCode($code);
 
 		$this->sendJson([
 			'error' => $message,
+			'logs' => $logs,
 		]);
 	}
 

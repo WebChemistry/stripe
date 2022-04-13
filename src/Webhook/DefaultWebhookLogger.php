@@ -8,10 +8,11 @@ final class DefaultWebhookLogger implements WebhookLogger
 	/** @var array<int, string> */
 	private array $logs = [];
 
-	public function __construct(
-		private ?string $name = null,
-	)
+	private ?string $name;
+
+	public function applyName(?string $name = null): void
 	{
+		$this->name = $name;
 	}
 
 	public function log(string $message): void
@@ -21,6 +22,9 @@ final class DefaultWebhookLogger implements WebhookLogger
 		$this->logs[] = $message;
 	}
 
+	/**
+	 * @return array<int, string>
+	 */
 	public function getLogs(): array
 	{
 		return $this->logs;

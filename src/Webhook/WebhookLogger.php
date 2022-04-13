@@ -7,9 +7,4 @@ interface WebhookLogger
 
 	public function log(string $message): void;
 
-	/**
-	 * @return array<int, string>
-	 */
-	public function getLogs(): array;
-
 }
