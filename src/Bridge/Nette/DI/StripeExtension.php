@@ -10,8 +10,6 @@ use stdClass;
 use Stripe\StripeClient;
 use WebChemistry\Stripe\Bridge\Nette\CustomerPortal\CustomerPortalResponseFactory;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookProcessorCollection;
-use WebChemistry\Stripe\Customer\DefaultStripeCustomerFinder;
-use WebChemistry\Stripe\Customer\StripeCustomerFinder;
 use WebChemistry\Stripe\CustomerPortal\CustomerPortalSessionFactory;
 use WebChemistry\Stripe\CustomerPortal\DefaultCustomerPortalSessionFactory;
 use WebChemistry\Stripe\Price\DefaultPriceResolver;
@@ -29,6 +27,9 @@ final class StripeExtension extends CompilerExtension
 	{
 		return Expect::structure([
 			'environment' => Expect::string('live'),
+			'metadata' => Expect::structure([
+				'user' => Expect::string()->required(),
+			]),
 			'keys' => Expect::structure([
 				'secret' => Expect::string()->required(),
 				'public' => Expect::string()->required(),
@@ -67,10 +68,6 @@ final class StripeExtension extends CompilerExtension
 
 		$builder->addDefinition($this->prefix('processorCollection'))
 			->setFactory(WebhookProcessorCollection::class);
-
-		$builder->addDefinition($this->prefix('customerFinder'))
-			->setType(StripeCustomerFinder::class)
-			->setFactory(DefaultStripeCustomerFinder::class);
 
 		$builder->addDefinition($this->prefix('customerPortal'))
 			->setType(CustomerPortalSessionFactory::class)

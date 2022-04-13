@@ -5,8 +5,6 @@ namespace WebChemistry\Stripe\Customer;
 interface StripeCustomer
 {
 
-	public function getEmail(): string;
-
 	public function getCustomerId(): ?string;
 
 	/**

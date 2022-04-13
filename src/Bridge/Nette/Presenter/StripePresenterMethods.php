@@ -2,7 +2,6 @@
 
 namespace WebChemistry\Stripe\Bridge\Nette\Presenter;
 
-use Nette\DI\Attributes\Inject;
 use Stripe\Exception\SignatureVerificationException;
 use Throwable;
 use Tracy\ILogger;

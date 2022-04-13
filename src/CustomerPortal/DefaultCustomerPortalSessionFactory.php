@@ -2,10 +2,10 @@
 
 namespace WebChemistry\Stripe\CustomerPortal;
 
+use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
 use WebChemistry\Stripe\Customer\StripeCustomer;
-use WebChemistry\Stripe\Customer\StripeCustomerFinder;
 use WebChemistry\Stripe\Exception\InvalidCustomerIdException;
 
 class DefaultCustomerPortalSessionFactory implements CustomerPortalSessionFactory
@@ -13,7 +13,6 @@ class DefaultCustomerPortalSessionFactory implements CustomerPortalSessionFactor
 
 	public function __construct(
 		private StripeClient $stripeClient,
-		private StripeCustomerFinder $customerFinder,
 	)
 	{
 	}
@@ -22,16 +21,15 @@ class DefaultCustomerPortalSessionFactory implements CustomerPortalSessionFactor
 	 * @throws InvalidCustomerIdException
 	 * @throws ApiErrorException
 	 */
-	public function create(StripeCustomer $customer, string $returnUrl): string
+	public function create(StripeCustomer|Customer $customer, string $returnUrl): string
 	{
-		$id = $this->customerFinder->findId($customer);
-
+		$id = $customer instanceof StripeCustomer ? $customer->getCustomerId() : $customer->id;
 		if (!$id) {
 			throw InvalidCustomerIdException::notSet();
 		}
 
 		$session = $this->stripeClient->billingPortal->sessions->create([
-			'customer' => $this->customerFinder->findId($customer),
+			'customer' => $id,
 			'return_url' => $returnUrl,
 		]);
 
