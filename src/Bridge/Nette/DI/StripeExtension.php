@@ -3,12 +3,15 @@
 namespace WebChemistry\Stripe\Bridge\Nette\DI;
 
 use Nette\DI\CompilerExtension;
+use Nette\DI\Definitions\ServiceDefinition;
+use Nette\DI\Definitions\Statement;
 use Nette\Schema\Expect;
 use Nette\Schema\Schema;
 use Nette\Utils\Arrays;
 use stdClass;
 use Stripe\StripeClient;
 use WebChemistry\Stripe\Bridge\Nette\CustomerPortal\CustomerPortalResponseFactory;
+use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookLoggerAware;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookProcessorCollection;
 use WebChemistry\Stripe\Customer\DefaultStripeCustomerFinder;
 use WebChemistry\Stripe\Customer\StripeCustomerFinder;
@@ -20,6 +23,7 @@ use WebChemistry\Stripe\Product\DefaultProductResolver;
 use WebChemistry\Stripe\Product\ProductResolver;
 use WebChemistry\Stripe\Subscription\DefaultSubscriptionResolver;
 use WebChemistry\Stripe\Subscription\SubscriptionResolver;
+use WebChemistry\Stripe\Webhook\DefaultWebhookLogger;
 use WebChemistry\Stripe\Webhook\WebhookEventFactory;
 
 final class StripeExtension extends CompilerExtension
@@ -99,6 +103,16 @@ final class StripeExtension extends CompilerExtension
 				DefaultPriceResolver::class,
 				[Arrays::map($config->prices, fn (stdClass $price) => $price->$environment)]
 			);
+	}
+
+	public function beforeCompile(): void
+	{
+		$builder = $this->getContainerBuilder();
+		foreach ($builder->findByType(WebhookLoggerAware::class) as $webhook) {
+			if ($webhook instanceof ServiceDefinition) {
+				$webhook->addSetup('setLogger', [new Statement(DefaultWebhookLogger::class, ['@self'])]);
+			}
+		}
 	}
 
 }
