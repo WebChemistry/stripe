@@ -35,7 +35,7 @@ class DefaultCustomerPortalSessionFactory implements CustomerPortalSessionFactor
 			'return_url' => $returnUrl,
 		]);
 
-		return $session->return_url;
+		return $session->url;
 	}
 	
 }
