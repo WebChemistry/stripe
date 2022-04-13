@@ -10,6 +10,7 @@ use WebChemistry\Stripe\Bridge\Nette\Webhook\Exception\HeaderIsNotSetException;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookEventFactory;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookProcessor;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookProcessorCollection;
+use WebChemistry\Stripe\Exception\WebhookException;
 
 trait StripePresenterMethods
 {
@@ -51,19 +52,24 @@ trait StripePresenterMethods
 			$this->sendError($exception->getMessage(), 403);
 		}
 
-		$error = null;
+		$errors = [];
+		$error = false;
 		foreach ($this->processors->getProcessors() as $processor) {
 			try {
 				$processor->process($event);
+			} catch(WebhookException $exception) {
+				$errors[] = $exception->getMessage();
 			} catch (Throwable $exception) {
 				$this->logger?->log($exception, Logger::ERROR);
 
-				$error = $exception->getMessage();
+				$error = true;
 			}
 		}
 
-		if ($error !== null) {
-			$this->sendError($error, 500);
+		if ($errors) {
+			$this->sendError($errors, 500);
+		} else if ($error) {
+			$this->sendError('Internal error, see logs.', 500);
 		}
 
 		$this->sendJson([
@@ -72,9 +78,10 @@ trait StripePresenterMethods
 	}
 
 	/**
+	 * @param string|string[] $message
 	 * @return never
 	 */
-	private function sendError(string $message, int $code): void
+	private function sendError(string|array $message, int $code): void
 	{
 		$this->getHttpResponse()->setCode($code);
 
