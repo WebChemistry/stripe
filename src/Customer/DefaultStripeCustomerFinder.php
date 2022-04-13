@@ -4,7 +4,7 @@ namespace WebChemistry\Stripe\Customer;
 
 use Stripe\StripeClient;
 
-class DefaultStripeCustomerFinder
+class DefaultStripeCustomerFinder implements StripeCustomerFinder
 {
 
 	public function __construct(
