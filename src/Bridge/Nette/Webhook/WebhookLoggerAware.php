@@ -9,4 +9,6 @@ interface WebhookLoggerAware
 
 	public function setLogger(WebhookLogger $logger): void;
 
+	public function getLogger(): WebhookLogger;
+
 }

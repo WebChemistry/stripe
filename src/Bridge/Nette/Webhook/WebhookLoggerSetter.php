@@ -14,4 +14,9 @@ trait WebhookLoggerSetter
 		$this->logger = $logger;
 	}
 
+	public function getLogger(): WebhookLogger
+	{
+		return $this->logger;
+	}
+
 }
