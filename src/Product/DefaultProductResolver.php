@@ -4,26 +4,11 @@ namespace WebChemistry\Stripe\Product;
 
 use BackedEnum;
 use OutOfBoundsException;
+use WebChemistry\Stripe\Resolver\DefaultResolver;
 
-final class DefaultProductResolver implements ProductResolver
+final class DefaultProductResolver extends DefaultResolver implements ProductResolver
 {
 
-	/**
-	 * @param array<string, string> $products
-	 */
-	public function __construct(
-		private array $products,
-	)
-	{
-	}
-
-	public function resolve(BackedEnum|string $product): string
-	{
-		if ($product instanceof BackedEnum) {
-			$product = $product->value;
-		}
-
-		return $this->products[$product] ?? throw new OutOfBoundsException(sprintf('Product %s does not exist.', $product));
-	}
+	protected string $name = 'Product';
 
 }

@@ -18,6 +18,8 @@ use WebChemistry\Stripe\Price\DefaultPriceResolver;
 use WebChemistry\Stripe\Price\PriceResolver;
 use WebChemistry\Stripe\Product\DefaultProductResolver;
 use WebChemistry\Stripe\Product\ProductResolver;
+use WebChemistry\Stripe\Subscription\DefaultSubscriptionResolver;
+use WebChemistry\Stripe\Subscription\SubscriptionResolver;
 use WebChemistry\Stripe\Webhook\WebhookEventFactory;
 
 final class StripeExtension extends CompilerExtension
@@ -37,6 +39,10 @@ final class StripeExtension extends CompilerExtension
 				'live' => Expect::string(),
 			])),
 			'prices' => Expect::arrayOf(Expect::structure([
+				'test' => Expect::string(),
+				'live' => Expect::string(),
+			])),
+			'subscriptions' => Expect::arrayOf(Expect::structure([
 				'test' => Expect::string(),
 				'live' => Expect::string(),
 			])),
@@ -78,6 +84,13 @@ final class StripeExtension extends CompilerExtension
 			->setFactory(
 				DefaultProductResolver::class,
 				[Arrays::map($config->products, fn (stdClass $product) => $product->$environment)]
+			);
+
+		$builder->addDefinition($this->prefix('subscriptionResolver'))
+			->setType(SubscriptionResolver::class)
+			->setFactory(
+				DefaultSubscriptionResolver::class,
+				[Arrays::map($config->subscriptions, fn (stdClass $subscription) => $subscription->$environment)]
 			);
 
 		$builder->addDefinition($this->prefix('priceResolver'))
