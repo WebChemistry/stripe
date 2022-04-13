@@ -10,6 +10,7 @@ use stdClass;
 use Stripe\StripeClient;
 use WebChemistry\Stripe\Bridge\Nette\CustomerPortal\CustomerPortalResponseFactory;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookProcessorCollection;
+use WebChemistry\Stripe\Customer\CustomerFinder;
 use WebChemistry\Stripe\CustomerPortal\CustomerPortalSessionFactory;
 use WebChemistry\Stripe\CustomerPortal\DefaultCustomerPortalSessionFactory;
 use WebChemistry\Stripe\Price\DefaultPriceResolver;
@@ -93,6 +94,9 @@ final class StripeExtension extends CompilerExtension
 				DefaultPriceResolver::class,
 				[Arrays::map($config->prices, fn (stdClass $price) => $price->$environment)]
 			);
+
+		$builder->addDefinition($this->prefix('finder'))
+			->setFactory(CustomerFinder::class);
 	}
 
 }
