@@ -53,23 +53,19 @@ trait StripePresenterMethods
 		}
 
 		$errors = [];
-		$error = false;
 		foreach ($this->processors->getProcessors() as $processor) {
 			try {
 				$processor->process($event);
 			} catch(WebhookException $exception) {
-				$errors[] = $exception->getMessage();
+				$errors[] = sprintf('Webhook %s: %s', $processor::class, $exception->getMessage());
 			} catch (Throwable $exception) {
-				$this->logger?->log($exception, Logger::ERROR);
-
-				$error = true;
+				$this->logger?->log($exception, ILogger::ERROR);
+				$errors[] = sprintf('Webhook %s: %s', $processor::class, $exception->getMessage());
 			}
 		}
 
 		if ($errors) {
 			$this->sendError($errors, 500);
-		} else if ($error) {
-			$this->sendError('Internal error, see logs.', 500);
 		}
 
 		$this->sendJson([
