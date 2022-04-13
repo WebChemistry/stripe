@@ -8,7 +8,7 @@ use WebChemistry\Stripe\Customer\StripeCustomer;
 use WebChemistry\Stripe\Customer\StripeCustomerFinder;
 use WebChemistry\Stripe\Exception\InvalidCustomerIdException;
 
-class DefaultCustomerPortalSessionFactory
+class DefaultCustomerPortalSessionFactory implements CustomerPortalSessionFactory
 {
 
 	public function __construct(
