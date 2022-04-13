@@ -27,9 +27,6 @@ final class StripeExtension extends CompilerExtension
 	{
 		return Expect::structure([
 			'environment' => Expect::string('live'),
-			'metadata' => Expect::structure([
-				'user' => Expect::string()->required(),
-			]),
 			'keys' => Expect::structure([
 				'secret' => Expect::string()->required(),
 				'public' => Expect::string()->required(),
