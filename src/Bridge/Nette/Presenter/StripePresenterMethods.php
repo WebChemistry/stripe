@@ -6,23 +6,33 @@ use Nette\DI\Attributes\Inject;
 use Stripe\Exception\SignatureVerificationException;
 use Throwable;
 use Tracy\ILogger;
-use Tracy\Logger;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\Exception\HeaderIsNotSetException;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookEventFactory;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookProcessor;
+use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookProcessorCollection;
 
 trait StripePresenterMethods
 {
 
-	#[Inject]
 	public WebhookEventFactory $webhookEventFactory;
 
-	#[Inject]
 	public ?ILogger $logger;
 
-	/** @var WebhookProcessor[] */
-	#[Inject]
-	public array $processors = [];
+	public WebhookProcessorCollection $processors;
+
+	/**
+	 * @param WebhookProcessor[] $processors
+	 */
+	final public function injectStripePresenterMethods(
+		WebhookEventFactory $webhookEventFactory,
+		?ILogger $logger,
+		WebhookProcessorCollection $webhookProcessorCollection,
+	): void
+	{
+		$this->webhookEventFactory = $webhookEventFactory;
+		$this->logger = $logger;
+		$this->processors = $webhookProcessorCollection;
+	}
 
 	/**
 	 * @never
@@ -42,7 +52,7 @@ trait StripePresenterMethods
 		}
 
 		$error = null;
-		foreach ($this->processors as $processor) {
+		foreach ($this->processors->getProcessors() as $processor) {
 			try {
 				$processor->process($event);
 			} catch (Throwable $exception) {

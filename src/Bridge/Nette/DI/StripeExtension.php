@@ -9,6 +9,7 @@ use Nette\Utils\Arrays;
 use stdClass;
 use Stripe\StripeClient;
 use WebChemistry\Stripe\Bridge\Nette\CustomerPortal\CustomerPortalResponseFactory;
+use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookProcessorCollection;
 use WebChemistry\Stripe\Customer\DefaultStripeCustomerFinder;
 use WebChemistry\Stripe\Customer\StripeCustomerFinder;
 use WebChemistry\Stripe\CustomerPortal\CustomerPortalSessionFactory;
@@ -29,7 +30,7 @@ final class StripeExtension extends CompilerExtension
 			'keys' => Expect::structure([
 				'secret' => Expect::string()->required(),
 				'public' => Expect::string()->required(),
-				'webhook' => Expect::string()->required(),
+				'webhook' => Expect::string(),
 			]),
 			'products' => Expect::arrayOf(Expect::structure([
 				'test' => Expect::string(),
@@ -53,7 +54,13 @@ final class StripeExtension extends CompilerExtension
 			->setFactory(StripeClient::class, [$config->keys->secret]);
 
 		$builder->addDefinition($this->prefix('webhookFactory'))
-			->setFactory(WebhookEventFactory::class, [$config->keys->webhook]);
+			->setFactory(WebhookEventFactory::class, [(string) $config->keys->webhook]);
+
+		$builder->addDefinition($this->prefix('netteWebhookFactory'))
+			->setFactory(\WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookEventFactory::class, [(string) $config->keys->webhook]);
+
+		$builder->addDefinition($this->prefix('processorCollection'))
+			->setFactory(WebhookProcessorCollection::class);
 
 		$builder->addDefinition($this->prefix('customerFinder'))
 			->setType(StripeCustomerFinder::class)
