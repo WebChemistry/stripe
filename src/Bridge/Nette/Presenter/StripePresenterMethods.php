@@ -2,7 +2,6 @@
 
 namespace WebChemistry\Stripe\Bridge\Nette\Presenter;
 
-use Nette\Application\UI\Presenter;
 use Nette\DI\Attributes\Inject;
 use Stripe\Exception\SignatureVerificationException;
 use Throwable;
@@ -12,7 +11,7 @@ use WebChemistry\Stripe\Bridge\Nette\Webhook\Exception\HeaderIsNotSetException;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookEventFactory;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookProcessor;
 
-abstract class AbstractWebhookPresenter extends Presenter
+trait StripePresenterMethods
 {
 
 	#[Inject]
@@ -25,7 +24,7 @@ abstract class AbstractWebhookPresenter extends Presenter
 	#[Inject]
 	public array $processors = [];
 
-	public function actionDefault(): void
+	public function processWebhooks(): void
 	{
 		try {
 			$event = $this->webhookEventFactory->create();
