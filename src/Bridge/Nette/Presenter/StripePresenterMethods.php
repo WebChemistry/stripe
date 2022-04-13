@@ -24,6 +24,9 @@ trait StripePresenterMethods
 	#[Inject]
 	public array $processors = [];
 
+	/**
+	 * @never
+	 */
 	public function processWebhooks(): void
 	{
 		try {
