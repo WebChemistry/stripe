@@ -8,6 +8,7 @@ use Nette\Schema\Schema;
 use Nette\Utils\Arrays;
 use stdClass;
 use Stripe\StripeClient;
+use WebChemistry\Stripe\Bridge\Nette\Checkout\SuccessCheckoutFactory;
 use WebChemistry\Stripe\Bridge\Nette\CustomerPortal\CustomerPortalResponseFactory;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookProcessorCollection;
 use WebChemistry\Stripe\Customer\CustomerFinder;
@@ -97,6 +98,9 @@ final class StripeExtension extends CompilerExtension
 
 		$builder->addDefinition($this->prefix('finder'))
 			->setFactory(CustomerFinder::class);
+
+		$builder->addFactoryDefinition($this->prefix('checkout.successFactory'))
+			->setImplement(SuccessCheckoutFactory::class);
 	}
 
 }
