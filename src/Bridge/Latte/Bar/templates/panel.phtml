@@ -1,0 +1,19 @@
+<?php /** @var WebChemistry\Stripe\Bridge\Latte\Bar\StripeBar $this */ ?>
+<h1>Webhooks</h1>
+
+<table class="tracy-sortable">
+	<thead>
+	<tr>
+		<th>Class</th>
+		<th>Events</th>
+	</tr>
+	</thead>
+	<tbody>
+		<?php foreach ($this->webhookProcessor->getWebhooks() as $webhook): $events = $webhook->getSubscribedEvents() ?>
+			<tr>
+				<td><?= $webhook::class ?></td>
+				<td><?= $events === null ? 'ALL' : implode('<br>', $events) ?></td>
+			</tr>
+		<?php endforeach; ?>
+	</tbody>
+</table>

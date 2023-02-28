@@ -5,21 +5,19 @@ namespace WebChemistry\Stripe\Bridge\Nette\Webhook;
 use Nette\Http\IRequest;
 use Stripe\Event;
 use Stripe\Exception\SignatureVerificationException;
+use Stripe\Webhook;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\Exception\BodyIsEmptyException;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\Exception\HeaderIsNotSetException;
-use WebChemistry\Stripe\Webhook\WebhookEventFactory as WebhookEventFactoryDecorated;
+use WebChemistry\Stripe\Webhook\WebhookEventFactory;
 
-final class WebhookEventFactory
+final class RequestWebhookEventFactory implements WebhookEventFactory
 {
 
-	private WebhookEventFactoryDecorated $factory;
-
 	public function __construct(
-		string $secret,
+		private string $secret,
 		private IRequest $request,
 	)
 	{
-		$this->factory = new WebhookEventFactoryDecorated($secret);
 	}
 
 	/**
@@ -36,11 +34,12 @@ final class WebhookEventFactory
 		}
 
 		$body = $this->request->getRawBody();
+
 		if (!$body) {
 			throw new BodyIsEmptyException();
 		}
 
-		return $this->factory->create($body, $header);
+		return Webhook::constructEvent($body, $header, $this->secret);
 	}
 
 }

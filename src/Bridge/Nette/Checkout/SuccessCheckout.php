@@ -47,8 +47,13 @@ final class SuccessCheckout
 	public function getSession(Component $component): Session
 	{
 		$parameter = $component->getParameter(self::COMPONENT_PARAM);
+
 		if (!$parameter) {
 			throw new InvalidSessionIdException(sprintf('Parameter %s is empty.', self::COMPONENT_PARAM));
+		}
+
+		if (!is_string($parameter)) {
+			throw new InvalidSessionIdException(sprintf('Parameter %s is not a string.', self::COMPONENT_PARAM));
 		}
 
 		try {

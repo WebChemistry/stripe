@@ -7,20 +7,24 @@ use Nette\Schema\Expect;
 use Nette\Schema\Schema;
 use Nette\Utils\Arrays;
 use stdClass;
+use Stripe\Stripe;
 use Stripe\StripeClient;
+use Tracy\Bar;
+use WebChemistry\Stripe\Bridge\Latte\Bar\StripeBar;
 use WebChemistry\Stripe\Bridge\Nette\Checkout\SuccessCheckoutFactory;
 use WebChemistry\Stripe\Bridge\Nette\CustomerPortal\CustomerPortalResponseFactory;
-use WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookProcessorCollection;
-use WebChemistry\Stripe\Customer\CustomerFinder;
+use WebChemistry\Stripe\Bridge\Nette\Webhook\RequestWebhookEventFactory;
 use WebChemistry\Stripe\CustomerPortal\CustomerPortalSessionFactory;
 use WebChemistry\Stripe\CustomerPortal\DefaultCustomerPortalSessionFactory;
+use WebChemistry\Stripe\Model\StripeCustomerModel;
+use WebChemistry\Stripe\Model\StripeProductModel;
 use WebChemistry\Stripe\Price\DefaultPriceResolver;
 use WebChemistry\Stripe\Price\PriceResolver;
 use WebChemistry\Stripe\Product\DefaultProductResolver;
 use WebChemistry\Stripe\Product\ProductResolver;
 use WebChemistry\Stripe\Subscription\DefaultSubscriptionResolver;
 use WebChemistry\Stripe\Subscription\SubscriptionResolver;
-use WebChemistry\Stripe\Webhook\WebhookEventFactory;
+use WebChemistry\Stripe\Webhook\WebhookProcessor;
 
 final class StripeExtension extends CompilerExtension
 {
@@ -59,14 +63,11 @@ final class StripeExtension extends CompilerExtension
 		$builder->addDefinition($this->prefix('client'))
 			->setFactory(StripeClient::class, [$config->keys->secret]);
 
-		$builder->addDefinition($this->prefix('webhookFactory'))
-			->setFactory(WebhookEventFactory::class, [(string) $config->keys->webhook]);
-
 		$builder->addDefinition($this->prefix('netteWebhookFactory'))
-			->setFactory(\WebChemistry\Stripe\Bridge\Nette\Webhook\WebhookEventFactory::class, [(string) $config->keys->webhook]);
+			->setFactory(RequestWebhookEventFactory::class, [(string) $config->keys->webhook]);
 
-		$builder->addDefinition($this->prefix('processorCollection'))
-			->setFactory(WebhookProcessorCollection::class);
+		$builder->addDefinition($this->prefix('processor'))
+			->setFactory(WebhookProcessor::class);
 
 		$builder->addDefinition($this->prefix('customerPortal'))
 			->setType(CustomerPortalSessionFactory::class)
@@ -74,6 +75,12 @@ final class StripeExtension extends CompilerExtension
 
 		$builder->addDefinition($this->prefix('customerPortalResponse'))
 			->setFactory(CustomerPortalResponseFactory::class);
+
+		$builder->addDefinition($this->prefix('model.product'))
+			->setFactory(StripeProductModel::class);
+
+		$builder->addDefinition($this->prefix('model.customer'))
+			->setFactory(StripeCustomerModel::class);
 
 		$builder->addDefinition($this->prefix('productResolver'))
 			->setType(ProductResolver::class)
@@ -96,11 +103,17 @@ final class StripeExtension extends CompilerExtension
 				[Arrays::map($config->prices, fn (stdClass $price) => $price->$environment)]
 			);
 
-		$builder->addDefinition($this->prefix('finder'))
-			->setFactory(CustomerFinder::class);
-
 		$builder->addFactoryDefinition($this->prefix('checkout.successFactory'))
 			->setImplement(SuccessCheckoutFactory::class);
+
+		$latteBar = $builder->addDefinition($this->prefix('latte.bar'))
+			->setFactory(StripeBar::class);
+
+		if ($name = $builder->getByType(Bar::class)) {
+			$this->initialization->addBody('$this->getService(?)->addPanel($this->getService(?));', [$name, $this->prefix('latte.bar')]);
+		}
+
+		$this->initialization->addBody(sprintf('%s::setApiKey(?);', Stripe::class), [$config->keys->secret]);
 	}
 
 }

@@ -2,6 +2,8 @@
 
 namespace WebChemistry\Stripe\Bridge\Nette\Webhook;
 
+use WebChemistry\Stripe\Webhook\WebhookProcessor;
+
 final class WebhookProcessorCollection
 {
 
