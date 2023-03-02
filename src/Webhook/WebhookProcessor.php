@@ -3,6 +3,7 @@
 namespace WebChemistry\Stripe\Webhook;
 
 use Psr\Log\LoggerInterface;
+use Stripe\Event;
 use Stripe\Exception\SignatureVerificationException;
 use Throwable;
 use WebChemistry\Stripe\Bridge\Nette\Webhook\Exception\HeaderIsNotSetException;
@@ -30,7 +31,7 @@ class WebhookProcessor
 
 	/**
 	 * @param WebhookEventFactory $factory
-	 * @param callable(?Webhook $webhook): LoggerInterface|null $loggerFactory
+	 * @param callable(?Webhook $webhook, ?Event $event): LoggerInterface|null $loggerFactory
 	 * @return int
 	 */
 	public function process(WebhookEventFactory $factory, ?callable $loggerFactory = null): int
@@ -40,13 +41,13 @@ class WebhookProcessor
 		try {
 			$event = $factory->create();
 		} catch (Throwable $exception) {
-			return $this->handleException($exception, $loggerFactory(null));
+			return $this->handleException($exception, $loggerFactory(null, null));
 		}
 
 		$hasError = false;
 
 		foreach ($this->webhooks as $webhook) {
-			$logger = $loggerFactory($webhook);
+			$logger = $loggerFactory($webhook, $event);
 
 			$events = $webhook->getSubscribedEvents();
 
