@@ -45,6 +45,15 @@ final class CustomerProduct
 		return $this->getPeriodEnd();
 	}
 
+	public function getTrialPeriodStart(): ?DateTime
+	{
+		if ($this->subscription->status !== 'trialing') {
+			return null;
+		}
+
+		return $this->getPeriodStart();
+	}
+
 	public function isTrial(): bool
 	{
 		return $this->subscription->status === 'trialing';
