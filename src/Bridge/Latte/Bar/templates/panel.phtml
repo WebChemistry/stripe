@@ -1,6 +1,6 @@
 <?php
-	/** @var WebChemistry\Stripe\Bridge\Latte\Bar\StripeBar $this */
-	use WebChemistry\Stripe\Bridge\Latte\Bar\WebhookDebugInfo;
+/** @var WebChemistry\Stripe\Bridge\Latte\Bar\StripeBar $this */
+use WebChemistry\Stripe\Bridge\Latte\Bar\WebhookDebugInfo;
 ?>
 <h1>Webhooks</h1>
 
@@ -12,17 +12,17 @@
 	</tr>
 	</thead>
 	<tbody>
-		<?php foreach ($this->webhookProcessor->getWebhooks() as $webhook): $events = $webhook->getSubscribedEvents() ?>
-			<tr>
-				<td>
-					<?= $webhook::class ?>
-					<?php if ($webhook instanceof WebhookDebugInfo): ?>
-						<br>
-						<?= $webhook->getDebugDescription() ?>
-					<?php endif; ?>
-				</td>
-				<td><?= $events === null ? 'ALL' : implode('<br>', $events) ?></td>
-			</tr>
-		<?php endforeach; ?>
+	<?php foreach ($this->webhookProcessor->getWebhooks() as $webhook): $events = $webhook->getSubscribedEvents() ?>
+		<tr>
+			<td>
+				<?= $webhook::class ?>
+				<?php if ($webhook instanceof WebhookDebugInfo): ?>
+					<br>
+					<span style="font-size: .7rem;color:#888888"><?= $webhook->getDebugDescription() ?></span>
+				<?php endif; ?>
+			</td>
+			<td><?= $events === null ? 'ALL' : implode('<br>', $events) ?></td>
+		</tr>
+	<?php endforeach; ?>
 	</tbody>
 </table>
