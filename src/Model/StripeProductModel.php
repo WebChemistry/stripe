@@ -39,35 +39,45 @@ final class StripeProductModel
 				continue;
 			}
 
-			if (!$plan instanceof Plan) {
-				trigger_error(sprintf('Expected %s given %s.', Plan::class, get_debug_type($plan)));
+			foreach ($this->getPlans($subscription) as $plan) {
+				$product = StripeIdExtractor::extractNullable($plan->product);
 
-				continue;
-			}
+				if (!$product) {
+					if ($reportMissingProduct) {
+						trigger_error(
+							sprintf(
+								'Product id does not exist for plan %s and customer %s',
+								$plan->id,
+								StripeIdExtractor::extract($subscription->customer),
+							)
+						);
+					}
 
-			$product = StripeIdExtractor::extractNullable($plan->product);
-
-			if (!$product) {
-				if ($reportMissingProduct) {
-					trigger_error(
-						sprintf(
-							'Product id does not exist for plan %s and customer %s',
-							$plan->id,
-							StripeIdExtractor::extract($subscription->customer),
-						)
-					);
+					continue;
 				}
 
-				continue;
+				$products[] = new CustomerProduct(
+					$product,
+					$subscription,
+				);
 			}
-
-			$products[] = new CustomerProduct(
-				$product,
-				$subscription,
-			);
 		}
 
 		return $products;
+	}
+
+	/**
+	 * @return Plan[]
+	 */
+	private function getPlans(Subscription $subscription): array
+	{
+		$plans = [];
+
+		foreach ($subscription->items->autoPagingIterator() as $item) {
+			$plans[] = $item->plan;
+		}
+
+		return $plans;
 	}
 
 }

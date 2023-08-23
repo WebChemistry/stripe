@@ -3,6 +3,7 @@
 namespace WebChemistry\Stripe\Bridge\Nette\DI;
 
 use Nette\DI\CompilerExtension;
+use Nette\DI\Definitions\Statement;
 use Nette\Schema\Expect;
 use Nette\Schema\Schema;
 use Nette\Utils\Arrays;
@@ -36,7 +37,7 @@ final class StripeExtension extends CompilerExtension
 			'keys' => Expect::structure([
 				'secret' => Expect::string()->required(),
 				'public' => Expect::string()->required(),
-				'webhook' => Expect::string(),
+				'webhook' => Expect::anyOf(Expect::type(Statement::class), Expect::string()),
 			]),
 			'products' => Expect::arrayOf(Expect::structure([
 				'test' => Expect::string(),
@@ -64,7 +65,7 @@ final class StripeExtension extends CompilerExtension
 			->setFactory(StripeClient::class, [$config->keys->secret]);
 
 		$builder->addDefinition($this->prefix('netteWebhookFactory'))
-			->setFactory(RequestWebhookEventFactory::class, [(string) $config->keys->webhook]);
+			->setFactory(RequestWebhookEventFactory::class, [$config->keys->webhook]);
 
 		$builder->addDefinition($this->prefix('processor'))
 			->setFactory(WebhookProcessor::class);
