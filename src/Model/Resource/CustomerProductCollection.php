@@ -17,12 +17,12 @@ final class CustomerProductCollection
 	/**
 	 * Returns in this order: non-trial with the highest period end, trial with the highest period end
 	 */
-	public function getMostImportantByProductId(string $productId): ?CustomerProduct
+	public function getMostImportant(?string $productId = null): ?CustomerProduct
 	{
 		$return = null;
 
 		foreach ($this->products as $product) {
-			if ($product->getProductId() !== $productId) {
+			if ($productId !== null && $product->getProductId() !== $productId) {
 				continue;
 			}
 

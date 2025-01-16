@@ -62,7 +62,9 @@ final class StripeExtension extends CompilerExtension
 		$environment = $config->environment;
 
 		$builder->addDefinition($this->prefix('client'))
-			->setFactory(StripeClient::class, [$config->keys->secret]);
+			->setFactory(StripeClient::class, [
+				['api_key' => $config->keys->secret],
+			]);
 
 		$builder->addDefinition($this->prefix('netteWebhookFactory'))
 			->setFactory(RequestWebhookEventFactory::class, [$config->keys->webhook]);

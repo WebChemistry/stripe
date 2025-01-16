@@ -2,8 +2,8 @@
 
 namespace WebChemistry\Stripe\Model;
 
+use Stripe\Collection;
 use Stripe\Plan;
-use Stripe\Product;
 use Stripe\StripeClient;
 use Stripe\Subscription;
 use WebChemistry\Stripe\Model\Resource\CustomerProduct;
@@ -31,10 +31,21 @@ final class StripeProductModel
 
 		$products = [];
 
+		foreach ($this->processSubscriptions($subscriptions) as $product) {
+			$products[] = $product;
+		}
+
+		return $products;
+	}
+
+	/**
+	 * @param Collection<Subscription> $subscriptions
+	 * @return iterable<CustomerProduct>
+	 */
+	private function processSubscriptions(Collection $subscriptions, bool $reportMissingProduct = false): iterable
+	{
 		/** @var Subscription $subscription */
 		foreach ($subscriptions->autoPagingIterator() as $subscription) {
-			$plan = $subscription->plan ?? null;
-
 			if (!in_array($subscription->status, ['active', 'trialing'], true)) {
 				continue;
 			}
@@ -56,14 +67,12 @@ final class StripeProductModel
 					continue;
 				}
 
-				$products[] = new CustomerProduct(
+				yield new CustomerProduct(
 					$product,
 					$subscription,
 				);
 			}
 		}
-
-		return $products;
 	}
 
 	/**

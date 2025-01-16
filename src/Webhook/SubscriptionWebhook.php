@@ -65,7 +65,7 @@ abstract class SubscriptionWebhook implements Webhook
 		foreach ($this->getCallbacks() as $product => $callback) {
 			$code = $callback(
 				$entity,
-				$collection->getMostImportantByProductId($this->productResolver->resolve($product)),
+				$collection->getMostImportant($this->productResolver->resolve($product)),
 				new WebhookArgs($event, $logger),
 			);
 
