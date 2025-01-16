@@ -23,15 +23,20 @@ final class StripeProductModel
 	 */
 	public function getAllActiveByCustomer(string $customerId, bool $includeTrialing = true, bool $reportMissingProduct = false): array
 	{
-		$subscriptions = $this->stripeClient->subscriptions->all([
+		$options = [
 			'customer' => $customerId,
-			'status' => $includeTrialing ? 'all' : 'active',
 			'limit' => 100,
-		]);
+		];
+
+		if (!$includeTrialing) {
+			$options['status'] = 'active';
+		}
+
+		$subscriptions = $this->stripeClient->subscriptions->all($options);
 
 		$products = [];
 
-		foreach ($this->processSubscriptions($subscriptions) as $product) {
+		foreach ($this->processSubscriptions($subscriptions, $reportMissingProduct) as $product) {
 			$products[] = $product;
 		}
 
