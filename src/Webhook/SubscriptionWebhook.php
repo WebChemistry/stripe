@@ -19,6 +19,8 @@ use WebChemistry\Stripe\Utility\StripeWebhookUtil;
 abstract class SubscriptionWebhook implements Webhook
 {
 
+	protected const AcceptAnyProduct = '';
+
 	/**
 	 * @param EntityModel<TEntity> $entityModel
 	 */
@@ -63,11 +65,11 @@ abstract class SubscriptionWebhook implements Webhook
 		$state = self::SUCCESS;
 
 		foreach ($this->getCallbacks() as $product => $callback) {
-			$code = $callback(
-				$entity,
-				$collection->getMostImportant($this->productResolver->resolve($product)),
-				new WebhookArgs($event, $logger),
+			$customerProduct = $collection->getMostImportant(
+				$product === self::AcceptAnyProduct ? null : $this->productResolver->resolve($product),
 			);
+
+			$code = $callback($entity, $customerProduct, new WebhookArgs($event, $logger));
 
 			if (is_int($code) && $code !== self::SUCCESS) {
 				$state = $code;
